@@ -10,20 +10,6 @@ Window.clearcolor = (1, 1, 1, 1)
 
 
 class MenuScreen(Screen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        logo = Image(source = 'assets/images/logo.png', fit_mode='fill')
-        button1 = Button(text = "открыть", font_size = "40sp", font_name = "assets/CascadiaCode.ttf")
-        label1 = Label(text = "Склад", font_size = "40sp", color = "black", font_name = "assets/CascadiaCode.ttf")
-
-        box = BoxLayout(orientation = "vertical")
-        box.add_widget(label1)
-        box.add_widget(logo)
-        box.add_widget(button1)
-        self.add_widget(box)
-
-        button1.on_press = self.goto_main
-
     def goto_main(self):
         self.manager.current = "main"
         self.manager.transition.direction = "down"
@@ -45,7 +31,7 @@ class MainScreen(Screen):
         label_apl = Label(text = "Яблоки        15кг", color = "black", font_name = "assets/CascadiaCode.ttf")
         label_gps = Label(text = "Винорад       8кг", color = "black", font_name = "assets/CascadiaCode.ttf")
 
-        box = BoxLayout(orientation = "vertical") 
+        box = BoxLayout(orientation = "vertical", padding = 30) 
         box2 = BoxLayout(orientation = "vertical") 
         box.add_widget(banana)
         box.add_widget(strawberry)

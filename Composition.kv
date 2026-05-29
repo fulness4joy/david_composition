@@ -1,0 +1,20 @@
+<MainButton@Button>
+    font_size: "40dp"
+    font_name: "assets/CascadiaCode.ttf"
+
+
+<MenuScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Склад"
+            font_size: "40sp"
+            color: "black"
+            font_name: "assets/CascadiaCode.ttf"
+        Image:
+            source: 'assets/images/logo.png'
+            fit_mode: 'fill'
+        MainButton:
+            text: "открыть"
+            on_press: 
+                root.goto_main()
