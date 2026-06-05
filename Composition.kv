@@ -5,9 +5,25 @@
 <MainLabel@Label>
     color: "black"
     font_name: "assets/CascadiaCode.ttf"
+    canvas.before:
+        Color:
+            rgba: (1, 1, 0, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10)]
 
 <MainImage@Image>
     size_hint: (0.1, 0.1)
+    fit_mode: 'contain'
+    size_hint_x: 0.4
+    pos_hint: {'center_y': 0.5}
+    size_hint_y: None
+    height: dp(50)
+
+<BoxRow@BoxLayout>:
+    size_hint_y: None
+    height: dp(50)
 
 
 <MenuScreen>:
@@ -28,14 +44,14 @@
                     radius: [dp(10)]
         Image:
             source: 'assets/images/logo.png'
-            fit_mode: 'fill'
+            fit_mode: 'cover'
         MenuButton:
             text: "Открыть"
             on_press: root.goto_main()
             
             background_normal: ""
             background_down: ""
-            background_color: (0, 0, 0, 0)
+            background_color: 0, 0, 0, 0
             canvas.before:
                 Color:
                     rgba: (0.11, 0.31, 0.85, 1) if self.state == 'normal' else (0.15, 0.39, 0.92, 1)   
@@ -45,33 +61,78 @@
                     size: self.size
                     radius: [dp(10)]
 
-<MainScreen>
-    BoxLayout:
-        orientation: "vertical"
-        MainLabel:
-            text: "Банан         12кг"
-        MainLabel:
-            text: "Клубника      6кг"
-        MainLabel:
-            text: "Арбуз         10кг"
-        MainLabel:
-            text: "Ананас        7кг"
-        MainLabel:
-            text: "Яблоки        15кг"
-        MainLabel:
-            text: "Винорад       8кг"
-    BoxLayout:
-        orientation: "vertical"
-        padding: 30
-        MainImage:
-            source: 'assets/images/banana.png'
-        MainImage:
-            source: 'assets/images/strawberry.png'
-        MainImage:
-            source: 'assets/images/watermelon.png'
-        MainImage:
-            source: 'assets/images/pineapple.png'
-        MainImage:
-            source: 'assets/images/apple.png'
-        MainImage:
-            source: 'assets/images/grepes.png'
+<MainScreen>:
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+        GridLayout:
+            id: main_container
+            cols: 1
+            row_default_height: 40
+            padding: '20dp'
+            spacing: '6dp'
+            BoxRow:
+                MainLabel:
+                    text: "Банан"
+                    size_hint_x: 0.3
+                MainLabel:
+                    text: "12кг"
+                    size_hint_x: 0.3
+                MainImage:
+                    source: 'assets/images/banana.png'
+
+            BoxRow:
+                MainLabel:
+                    text: "Клубника"
+                    size_hint_x: 0.3
+                MainLabel:
+                    text: "6кг"
+                    size_hint_x: 0.3
+                MainImage:
+                    source: 'assets/images/strawberry.png'
+                    size_hint_x: 0.4
+                    pos_hint: {'center_y': 0.5}
+            BoxRow:
+                MainLabel:
+                    text: "Арбуз"
+                    size_hint_x: 0.3
+                MainLabel:
+                    text: "10кг"
+                    size_hint_x: 0.3
+                MainImage:
+                    source: 'assets/images/watermelon.png'
+                    size_hint_x: 0.4
+                    pos_hint: {'center_y': 0.5}
+
+
+
+# <MainScreen>
+#     BoxLayout:
+#         orientation: "vertical"
+#         MainLabel:
+#             text: "Банан         12кг"
+#         MainLabel:
+#             text: "Клубника      6кг"
+#         MainLabel:
+#             text: "Арбуз         10кг"
+#         MainLabel:
+#             text: "Ананас        7кг"
+#         MainLabel:
+#             text: "Яблоки        15кг"
+#         MainLabel:
+#             text: "Винорад       8кг"
+#     BoxLayout:
+#         orientation: "vertical"
+#         padding: 30
+#         MainImage:
+#             source: 'assets/images/banana.png'
+#         MainImage:
+#             source: 'assets/images/strawberry.png'
+#         MainImage:
+#             source: 'assets/images/watermelon.png'
+#         MainImage:
+#             source: 'assets/images/pineapple.png'
+#         MainImage:
+#             source: 'assets/images/apple.png'
+#         MainImage:
+#             source: 'assets/images/grepes.png'

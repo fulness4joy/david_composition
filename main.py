@@ -6,8 +6,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window 
-Window.clearcolor = (0.12, 0.16, 0.22, 1)
+
     
+
+class BoxRow(BoxLayout):
+    ...    
+
 
 class MenuScreen(Screen):
     def goto_main(self):
@@ -19,6 +23,12 @@ class MainScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         pass
+
+    def on_kv_post(self, base_widget):
+
+        self.ids.main_container.add_widget(BoxRow())
+
+        return super().on_kv_post(base_widget)
      
     def goto_main(self):
         self.manager.current = "menu"
@@ -36,5 +46,9 @@ class CompositionApp(App):
 
 
 if __name__ == '__main__':
+
+    Window.clearcolor = (0.12, 0.16, 0.22, 1)
+    Window.size = (450, 900)
+
     app = CompositionApp()
     app.run()
