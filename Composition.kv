@@ -1,20 +1,77 @@
-<MainButton@Button>
+<MenuButton@Button>
     font_size: "40dp"
     font_name: "assets/CascadiaCode.ttf"
+
+<MainLabel@Label>
+    color: "black"
+    font_name: "assets/CascadiaCode.ttf"
+
+<MainImage@Image>
+    size_hint: (0.1, 0.1)
 
 
 <MenuScreen>:
     BoxLayout:
         orientation: "vertical"
+        padding: 80
         Label:
             text: "Склад"
             font_size: "40sp"
-            color: "black"
+            color: (0.15, 0.15, 0.15, 1)
             font_name: "assets/CascadiaCode.ttf"
+            canvas.before:
+                Color:
+                    rgba: (0.85, 0.87, 0.90, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
         Image:
             source: 'assets/images/logo.png'
             fit_mode: 'fill'
-        MainButton:
-            text: "открыть"
-            on_press: 
-                root.goto_main()
+        MenuButton:
+            text: "Открыть"
+            on_press: root.goto_main()
+            
+            background_normal: ""
+            background_down: ""
+            background_color: (0, 0, 0, 0)
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.31, 0.85, 1) if self.state == 'normal' else (0.15, 0.39, 0.92, 1)   
+
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+
+<MainScreen>
+    BoxLayout:
+        orientation: "vertical"
+        MainLabel:
+            text: "Банан         12кг"
+        MainLabel:
+            text: "Клубника      6кг"
+        MainLabel:
+            text: "Арбуз         10кг"
+        MainLabel:
+            text: "Ананас        7кг"
+        MainLabel:
+            text: "Яблоки        15кг"
+        MainLabel:
+            text: "Винорад       8кг"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 30
+        MainImage:
+            source: 'assets/images/banana.png'
+        MainImage:
+            source: 'assets/images/strawberry.png'
+        MainImage:
+            source: 'assets/images/watermelon.png'
+        MainImage:
+            source: 'assets/images/pineapple.png'
+        MainImage:
+            source: 'assets/images/apple.png'
+        MainImage:
+            source: 'assets/images/grepes.png'
