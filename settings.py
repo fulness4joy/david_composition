@@ -1,0 +1,1 @@
+PATH = 'C:\\Users\\Админ\\Downloads\\Давидик\\Project\\python_pro\\project_composition\\assets\\list_products.txt'
