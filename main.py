@@ -21,6 +21,10 @@ class MainLabel(Label):
     pass
 
 
+class MainImage(Image):
+    pass
+
+
 class MenuScreen(Screen):
     def goto_main(self):
         self.manager.current = "main"
@@ -30,30 +34,41 @@ class MenuScreen(Screen):
 class MainScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
+        self.load_resources()
         self.load_products()
 
     def on_kv_post(self, base_widget):
         self.ids.main_container.add_widget(BoxRow())
 
         return super().on_kv_post(base_widget)
+    
+    def load_resources(self):
+        with open(PATH_DATA + "list_resources.txt", "r", encoding = "utf8") as file:    
+            lines = file.readlines()
+            print(lines)
+        
+        for e in lines:
+            space = e.find(" ")
+            key = e[0:space]
+            path = e[space + 1:]
+            path = path.replace("\n", "")
+            RESOURCES[key] = path
 
     def load_products(self):
-        with open(PATH, "r", encoding = "utf8") as file:    
+        with open(PATH_DATA + "list_products.txt", "r", encoding = "utf8") as file:    
             lines = file.readlines()
-        gl = GridLayout(orientation = 'lr-tb', cols = 1, padding = '20dp', spacing = '10dp')
         
         for e in lines:
             space = e.find(" ")
             product = e[0:space]
             weight = e[space + 1:-1]
             
-            bl = BoxLayout(size_hint_y = None, height = dp(50), spacing = '10dp')
+            bl = BoxRow(size_hint_y = None, height = dp(50), spacing = '10dp')
             bl.add_widget(MainLabel(text = product))
             bl.add_widget(MainLabel(text = weight))
-            bl.add_widget(Image(source = RESOURCES[product]))
-            gl.add_widget(bl)
+            bl.add_widget(MainImage(source = RESOURCES[product]))
 
-        self.ids.main_container.add_widget(gl)
+            self.ids.main_container.add_widget(bl)
             
     def goto_main(self):
         self.manager.current = "menu"

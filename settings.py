@@ -1,1 +1,4 @@
-PATH = 'C:\\Users\\Админ\\Downloads\\Давидик\\Project\\python_pro\\project_composition\\assets\\list_products.txt'
+import os
+
+PATH = os.path.dirname(__file__) + os.sep
+PATH_DATA = PATH + "data" + os.sep
