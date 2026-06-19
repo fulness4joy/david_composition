@@ -14,8 +14,11 @@ from kivy.core.window import Window
 
 
 class BoxRow(BoxLayout):
-    pass  
-
+    def on_touch_up(self, touch):
+        if self.collide_point(touch.pos[0], touch.pos[1]):
+            print(self.name)
+        return super().on_touch_up(touch)  
+        
 
 class MainLabel(Label):
     pass
@@ -45,7 +48,6 @@ class MainScreen(Screen):
     def load_resources(self):
         with open(PATH_DATA + "list_resources.txt", "r", encoding = "utf8") as file:    
             lines = file.readlines()
-            print(lines)
         
         for e in lines:
             space = e.find(" ")
@@ -63,7 +65,7 @@ class MainScreen(Screen):
             product = e[0:space]
             weight = e[space + 1:-1]
             
-            bl = BoxRow(size_hint_y = None, height = dp(50), spacing = '10dp')
+            bl = BoxRow(size_hint_y = None, height = dp(50), spacing = '10dp', name = product)
             bl.add_widget(MainLabel(text = product))
             bl.add_widget(MainLabel(text = weight))
             bl.add_widget(MainImage(source = RESOURCES[product]))
