@@ -1,4 +1,5 @@
 import os
+import json
 from settings import*
 from resources import*
 from kivy.app import App
@@ -44,24 +45,19 @@ class ProductScreen(Screen):
         super().__init__(**kw)
 
     def read_products(self):
-        with open(PATH_DATA + "list_products.txt", "r", encoding="utf8") as file:
-            lines = file.readlines()
+        with open(PATH_DATA + "list_products.json", "r", encoding="utf8") as file:
+            data = json.load(file)
 
         products = []
-        for e in lines:
-            e = e.strip()
-            if not e:
-                continue
-            space = e.find(" ")
-            name = e[0:space]
-            weight = e[space + 1:]
+        for name in data:
+            weight = data[name]
             products.append((name, weight))
         return products
-    
+
     def write_products(self, products):
-        with open(PATH_DATA + "list_products.txt", "w", encoding="utf8") as file:
-            for name, weight in products:
-                file.write(f"{name} {weight}\n")
+        data = {name: weight for name, weight in products}
+        with open(PATH_DATA + "list_products.json", "w", encoding="utf8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
     def load_product(self, name):
         self.product_name = name
@@ -129,17 +125,10 @@ class MainScreen(Screen):
         self.load_resources()
 
     def load_resources(self):
-        with open(PATH_DATA + "list_resources.txt", "r", encoding = "utf8") as file:    
-            lines = file.readlines()
-        
-        for e in lines:
-            e = e.strip()
-            if not e:
-                continue
-            space = e.find(" ")
-            key = e[0:space]
-            path = e[space + 1:]
-            RESOURCES[key] = path
+        with open(PATH_DATA + "list_resources.json", "r", encoding="utf8") as file:
+            data = json.load(file)
+
+        RESOURCES.update(data)
 
     def load_products(self):
         screen = self.manager.get_screen("product_screen")
