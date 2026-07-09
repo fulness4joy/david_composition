@@ -5,7 +5,7 @@
     font_name: "assets/CascadiaCode.ttf"
 
 
-<MainLabel@Label>
+<MainLabel>:
     color: "black"
     font_name: "assets/CascadiaCode.ttf"
     canvas.before:
@@ -17,7 +17,7 @@
             radius: [dp(10)]
 
 
-<MainImage@Image>   
+<MainImage>:
     size_hint: (0.1, 0.1)
     fit_mode: 'contain'
     size_hint_x: 0.4
@@ -26,10 +26,9 @@
     height: dp(50)
 
 
-<BoxRow@BoxLayout>:
+<BoxRow>:
     size_hint_y: None
     height: dp(50)
-    name: apple
 
 
 <MenuScreen>:
@@ -78,3 +77,77 @@
             row_default_height: 40
             padding: '20dp'
             spacing: '6dp'  
+
+
+<ProductScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "20dp", "10dp"
+        spacing: "8dp"
+
+        Button:
+            text: "< Назад"
+            size_hint: None, None
+            size: "120dp", "50dp"
+            background_normal: ""
+            background_color: 0.3, 0.3, 0.3, 1
+            on_press: root.goto_main()
+
+        Image:
+            source: root.product_image
+            fit_mode: "contain"
+            size_hint_y: None
+            height: "160dp"
+
+        MainLabel:
+            id: text_product
+            text: root.product_name
+            size_hint: (None, None)
+            size: (dp(180), dp(45))
+            pos_hint: {"center_x": 0.5}
+
+        MainLabel:
+            id: text_quantity
+            text: root.product_quantity
+            size_hint: (None, None)
+            size: (dp(100), dp(45))
+            pos_hint: {"center_x": 0.5}
+
+        BoxLayout:
+            size_hint_y: None
+            height: "70dp"
+            spacing: "15dp"
+            padding: "60dp", 0
+
+            Button:
+                text: "+"
+                size_hint: None, None
+                size: "65dp", "65dp"
+                background_normal: ""
+                background_color: 0.2, 0.7, 0.2, 1
+                radius: [32]
+                on_press: root.add_quantity()
+
+            Widget:
+                size_hint_x: 1
+
+            Button:
+                text: "-"
+                size_hint: None, None
+                size: "65dp", "65dp"
+                background_normal: ""
+                background_color: 0.8, 0.2, 0.2, 1
+                radius: [32]
+                on_press: root.delete_quantity()
+
+        Button:
+            text: "Delete"
+            size_hint: None, None
+            size: "150dp", "55dp"
+            pos_hint: {"center_x": 0.5}
+            background_normal: ""
+            background_color: 0.5, 0.5, 0.5, 1
+            on_press: root.delete_product()
+
+        Widget:
+            size_hint_y: 1
