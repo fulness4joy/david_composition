@@ -1,4 +1,4 @@
-#:import RESOURCES resources.RESOURCES  
+#:import RESOURCES resources.RESOURCES
 
 <MenuButton@Button>
     font_size: "40dp"
@@ -53,13 +53,13 @@
         MenuButton:
             text: "Открыть"
             on_press: root.goto_main()
-            
+
             background_normal: ""
             background_down: ""
             background_color: 0, 0, 0, 0
             canvas.before:
                 Color:
-                    rgba: (0.11, 0.31, 0.85, 1) if self.state == 'normal' else (0.15, 0.39, 0.92, 1)   
+                    rgba: (0.11, 0.31, 0.85, 1) if self.state == 'normal' else (0.15, 0.39, 0.92, 1)
 
                 RoundedRectangle:
                     pos: self.pos
@@ -68,15 +68,44 @@
 
 
 <MainScreen>:
-    ScrollView:
-        do_scroll_x: False
-        do_scroll_y: True
-        GridLayout:
-            id: main_container
-            cols: 1
-            row_default_height: 40
-            padding: '20dp'
-            spacing: '6dp'  
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: "56dp"
+            padding: "10dp", "8dp"
+            spacing: "10dp"
+
+            Button:
+                text: "Меню"
+                size_hint: None, None
+                size: "100dp", "40dp"
+                background_normal: ""
+                background_color: 0.3, 0.3, 0.3, 1
+                on_press: root.goto_main()
+
+            Widget:
+
+            Button:
+                text: "Корзина"
+                size_hint: None, None
+                size: "120dp", "40dp"
+                background_normal: ""
+                background_color: 0.11, 0.31, 0.85, 1
+                on_press: root.goto_basket()
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+
+            GridLayout:
+                id: main_container
+                cols: 1
+                row_default_height: 40
+                size_hint_y: None
+                height: self.minimum_height
+                padding: '20dp'
+                spacing: '6dp'
 
 
 <ProductScreen>:
@@ -151,3 +180,31 @@
 
         Widget:
             size_hint_y: 1
+
+
+<BasketScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "20dp", "10dp"
+        spacing: "8dp"
+
+        Button:
+            text: "< Назад"
+            size_hint: None, None
+            size: "120dp", "50dp"
+            background_normal: ""
+            background_color: 0.3, 0.3, 0.3, 1
+            on_press: root.goto_main()
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+
+            GridLayout:
+                id: basket_container
+                cols: 1
+                row_default_height: 40
+                size_hint_y: None
+                height: self.minimum_height
+                padding: '20dp'
+                spacing: '6dp'
