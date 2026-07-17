@@ -29,6 +29,21 @@
 <BoxRow>:
     size_hint_y: None
     height: dp(50)
+    spacing: dp(10)
+    MainLabel:
+        text: root.product_name
+    MainLabel:
+        text: root.product_price
+    MainLabel:
+        text: root.product_quantity
+    MainLabel:
+        text: root.product_volume
+    MainImage:
+        source: RESOURCES[root.product_name]
+    CheckBox:
+        on_active: root.on_checkbox_active(self)
+        active: root.cb_active
+        
 
 
 <MenuScreen>:

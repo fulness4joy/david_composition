@@ -13,7 +13,7 @@ from kivy.uix.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.metrics import dp
 from kivy.core.window import Window
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.checkbox import CheckBox
 
 
@@ -21,6 +21,10 @@ from kivy.uix.checkbox import CheckBox
 
 class BoxRow(BoxLayout):
     product_name = StringProperty("")
+    product_price = StringProperty("")
+    product_volume = StringProperty("")
+    product_quantity = StringProperty("")
+    cb_active = BooleanProperty(False)
 
     def on_touch_up(self, touch):
         if self.collide_point(touch.pos[0], touch.pos[1]) and self.product_name:
@@ -29,6 +33,14 @@ class BoxRow(BoxLayout):
             product_screen.load_product(self.product_name)
             app.root.current = 'product_screen'
         return super().on_touch_up(touch)
+    
+    def on_checkbox_active(self, instanse):
+        if instanse.active:
+            if self.product_name not in basket:
+                basket.append(self.product_name)
+        else:
+            if self.product_name in basket:
+                basket.remove(self.product_name)
 
 
 class MainLabel(Label):
@@ -159,34 +171,27 @@ class MainScreen(Screen):
         screen = self.manager.get_screen("product_screen")
         products = screen.read_products()
         self.ids.main_container.clear_widgets()
+        cb_active = False
 
         for name in products:
-            quantity = products[name]["quantity"]
-            price = products[name]["price"]
-            volume = products[name]["volume"]
-
-            bl = BoxRow(size_hint_y = None, height = dp(50), spacing = '10dp', product_name = name)
             if name in basket:
-                checkbox = CheckBox(active = True)
-            else:
-                checkbox = CheckBox(active = False)
-            checkbox.bind(active = lambda checkbox, value, name = name: self.on_checkbox_active(checkbox, value, name))
+                cb_active = True
+            else: cb_active = False
+            print(name ,cb_active)
+
+            bl = BoxRow(product_name = name, product_price = products[name]["price"],
+                        product_volume = products[name]["volume"], product_quantity = products[name]["quantity"],
+                        cb_active = cb_active)
             
-            bl.add_widget(MainLabel(text = name))
-            bl.add_widget(MainLabel(text = quantity))
-            bl.add_widget(MainLabel(text = price))
-            bl.add_widget(MainLabel(text = volume))
-            bl.add_widget(MainImage(source = RESOURCES[name]))
-            bl.add_widget(checkbox)
+            # checkbox.bind(active = lambda checkbox, value, name = name: self.on_checkbox_active(checkbox, value, name))
             self.ids.main_container.add_widget(bl)
 
-    def on_checkbox_active(self, checkbox, value, name):
-        if value:
-            if name not in basket:
-                basket.append(name)
-        else:
-            if name in basket:
-                basket.remove(name)
+    def on_cb_active(self, instans, value):
+        print(instans, value)
+
+    
+
+
 
 
     def on_pre_enter(self, *args):
