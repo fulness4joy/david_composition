@@ -1,7 +1,7 @@
 import os
 import json
-from settings import*
-from resources import*
+from settings import *
+from resources import *
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -17,6 +17,26 @@ from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.checkbox import CheckBox
 
 
+def get_box_count(name):
+    for item in basket_quantity:
+        if item[0] == name:
+            return item[1]
+    return 0
+
+
+def set_box_count(name, count):
+    for item in basket_quantity:
+        if item[0] == name:
+            item[1] = count
+            return
+    basket_quantity.append([name, count])
+
+
+def remove_box_count(name):
+    for item in basket_quantity:
+        if item[0] == name:
+            basket_quantity.remove(item)
+            return
 
 
 class BoxRow(BoxLayout):
@@ -29,11 +49,11 @@ class BoxRow(BoxLayout):
     def on_touch_up(self, touch):
         if self.collide_point(touch.pos[0], touch.pos[1]) and self.product_name:
             app = App.get_running_app()
-            product_screen = app.root.get_screen('product_screen')
+            product_screen = app.root.get_screen("product_screen")
             product_screen.load_product(self.product_name)
-            app.root.current = 'product_screen'
+            app.root.current = "product_screen"
         return super().on_touch_up(touch)
-    
+
     def on_checkbox_active(self, instanse):
         if instanse.active:
             if self.product_name not in basket:
@@ -51,6 +71,23 @@ class MainImage(Image):
     pass
 
 
+class BasketRow(BoxLayout):
+    product_name = StringProperty("")
+    product_price = StringProperty("")
+    product_volume = StringProperty("")
+    quantity_box = StringProperty("0")
+    box_count = StringProperty("0")
+
+    def on_touch_up(self, touch):
+        if self.collide_point(touch.pos[0], touch.pos[1]) and self.product_name:
+            app = App.get_running_app()
+            item_screen = app.root.get_screen("basket_item")
+            item_screen.load_item(self.product_name)
+            app.root.current = "basket_item"
+            app.root.transition.direction = "left"
+        return super().on_touch_up(touch)
+
+
 class BasketScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -63,17 +100,75 @@ class BasketScreen(Screen):
         for name in basket:
             if name in products:
                 info = products[name]
-                bl = BoxLayout(size_hint_y = None, height = dp(50), spacing = '10dp')
-                bl.add_widget(MainLabel(text = name))
-                bl.add_widget(MainLabel(text = info["quantity"]))
-                bl.add_widget(MainLabel(text = info["price"]))
-                bl.add_widget(MainLabel(text = info["volume"]))
-                bl.add_widget(MainImage(source = RESOURCES[name]))
-                self.ids.basket_container.add_widget(bl)
+                box_count = get_box_count(name)
+
+                row = BasketRow(
+                    product_name=name,
+                    product_price=info["price"],
+                    product_volume=info["volume"],
+                    quantity_box=info["quantity"],
+                    box_count=str(box_count),
+                )
+                self.ids.basket_container.add_widget(row)
 
     def goto_main(self):
         self.manager.current = "main"
         self.manager.transition.direction = "up"
+
+
+class BasketItemScreen(Screen):
+    product_name = StringProperty("")
+    product_image = StringProperty("")
+    quantity_box = StringProperty("0")
+    box_count = StringProperty("0")
+
+    def load_item(self, name):
+        product_screen = self.manager.get_screen("product_screen")
+        products = product_screen.read_products()
+
+        self.product_name = name
+        self.product_image = RESOURCES[name]
+        self.quantity_box = "0"
+
+        if name in products:
+            self.quantity_box = products[name]["quantity"]
+
+        self.box_count = str(get_box_count(name))
+
+    def add_quantity(self):
+        count = int(self.box_count)
+        if count < 155:
+            count += 1
+        self.box_count = str(count)
+        self.save_boxes()
+
+    def delete_quantity(self):
+        count = int(self.box_count)
+        if count > 0:
+            count -= 1
+        self.box_count = str(count)
+        self.save_boxes()
+
+    def set_boxes_manual(self, text):
+        count = ""
+        for ch in text:
+            if ch.isdigit:
+                count += ch
+        if count == "":
+            count = "0"
+        if count != self.box_count:
+            self.box_count = count
+            self.save_boxes()
+
+    def save_boxes(self):
+        count = int(self.box_count)
+        set_box_count(self.product_name, count)
+
+    def goto_basket(self):
+        screen = self.manager.get_screen("basket")
+        screen.load_basket()
+        self.manager.current = "basket"
+        self.manager.transition.direction = "right"
 
 
 class ProductScreen(Screen):
@@ -93,7 +188,7 @@ class ProductScreen(Screen):
 
     def write_products(self, products):
         with open(PATH_DATA + "list_products.json", "w", encoding="utf8") as file:
-            json.dump(products, file, ensure_ascii = False, indent = 4)
+            json.dump(products, file, ensure_ascii=False, indent=4)
 
     def load_product(self, name):
         products = self.read_products()
@@ -144,6 +239,8 @@ class ProductScreen(Screen):
         if self.product_name in basket:
             basket.remove(self.product_name)
 
+        remove_box_count(self.product_name)
+
         self.goto_main()
 
     def goto_main(self):
@@ -163,7 +260,7 @@ class MainScreen(Screen):
         self.load_resources()
 
     def load_resources(self):
-        with open(PATH_DATA + "list_resources.json", "r", encoding = "utf8") as file:
+        with open(PATH_DATA + "list_resources.json", "r", encoding="utf8") as file:
             data = json.load(file)
             RESOURCES.update(data)
 
@@ -176,23 +273,19 @@ class MainScreen(Screen):
         for name in products:
             if name in basket:
                 cb_active = True
-            else: cb_active = False
-            print(name ,cb_active)
+            else:
+                cb_active = False
+            # print(name, cb_active)
 
-            bl = BoxRow(product_name = name, product_price = products[name]["price"],
-                        product_volume = products[name]["volume"], product_quantity = products[name]["quantity"],
-                        cb_active = cb_active)
-            
-            # checkbox.bind(active = lambda checkbox, value, name = name: self.on_checkbox_active(checkbox, value, name))
+            bl = BoxRow(
+                product_name=name,
+                product_price=products[name]["price"],
+                product_volume=products[name]["volume"],
+                product_quantity=products[name]["quantity"],
+                cb_active=cb_active,
+            )
+
             self.ids.main_container.add_widget(bl)
-
-    def on_cb_active(self, instans, value):
-        print(instans, value)
-
-    
-
-
-
 
     def on_pre_enter(self, *args):
         self.load_products()
@@ -209,20 +302,21 @@ class MainScreen(Screen):
         self.manager.transition.direction = "down"
 
 
-
 class CompositionApp(App):
     resources = RESOURCES
+
     def build(self):
         scr_sm = ScreenManager()
-        scr_sm.add_widget(MenuScreen(name = "menu"))
-        scr_sm.add_widget(MainScreen(name = "main"))
-        scr_sm.add_widget(ProductScreen(name = "product_screen"))
-        scr_sm.add_widget(BasketScreen(name = "basket"))
+        scr_sm.add_widget(MenuScreen(name="menu"))
+        scr_sm.add_widget(MainScreen(name="main"))
+        scr_sm.add_widget(ProductScreen(name="product_screen"))
+        scr_sm.add_widget(BasketScreen(name="basket"))
+        scr_sm.add_widget(BasketItemScreen(name="basket_item"))
 
         return scr_sm
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     Window.clearcolor = (0.12, 0.16, 0.22, 1)
     Window.size = (450, 900)

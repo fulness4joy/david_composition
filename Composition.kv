@@ -43,7 +43,99 @@
     CheckBox:
         on_active: root.on_checkbox_active(self)
         active: root.cb_active
-        
+
+
+<BasketRow>:
+    size_hint_y: None
+    height: dp(50)
+    spacing: dp(10)
+    MainLabel:
+        text: root.product_name
+    MainLabel:
+        text: root.product_price
+    MainLabel:
+        text: root.quantity_box
+    MainLabel:
+        text: root.box_count
+    MainImage:
+        source: RESOURCES[root.product_name]
+
+
+<BasketItemScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: "20dp", "10dp"
+        spacing: "8dp"
+
+        Button:
+            text: "< Назад"
+            size_hint: None, None
+            size: "120dp", "50dp"
+            background_normal: ""
+            background_color: 0.3, 0.3, 0.3, 1
+            on_press: root.goto_basket()
+
+        Image:
+            source: root.product_image
+            fit_mode: "contain"
+            size_hint_y: None
+            height: "160dp"
+
+        MainLabel:
+            id: text_product
+            text: root.product_name
+            size_hint: (None, None)
+            size: (dp(180), dp(45))
+            pos_hint: {"center_x": 0.5}
+
+        MainLabel:
+            text: "Продуктов в коробке: " + root.quantity_box
+            size_hint: (None, None)
+            size: (dp(260), dp(40))
+            pos_hint: {"center_x": 0.5}
+
+        MainLabel:
+            text: "Коробок:"
+            size_hint: (None, None)
+            size: (dp(150), dp(35))
+            pos_hint: {"center_x": 0.5}
+
+        BoxLayout:
+            size_hint_y: None
+            height: "70dp"
+            spacing: "15dp"
+            padding: "40dp", 0
+
+            Button:
+                text: "-"
+                size_hint: None, None
+                size: "65dp", "65dp"
+                background_normal: ""
+                background_color: 0.8, 0.2, 0.2, 1
+                radius: [32]
+                on_press: root.delete_quantity()
+
+            TextInput:
+                id: box_input
+                text: root.box_count
+                multiline: False
+                input_filter: "int"
+                font_size: "24sp"
+                halign: "center"
+                on_text: root.set_boxes_manual(self.text)
+
+            Button:
+                text: "+"
+                size_hint: None, None
+                size: "65dp", "65dp"
+                background_normal: ""
+                background_color: 0.2, 0.7, 0.2, 1
+                radius: [32]
+                on_press: root.add_quantity()
+
+        Widget:
+            size_hint_y: 1
+
 
 
 <MenuScreen>:
@@ -109,6 +201,30 @@
                 background_color: 0.11, 0.31, 0.85, 1
                 on_press: root.goto_basket()
 
+        BoxLayout:
+            size_hint_y: None
+            height: "56dp"
+            padding: "10dp", "8dp"
+            spacing: "10dp"
+            Widget:
+                size_hint_x: 0.1
+            Label:
+                text: "Название:"
+            Widget:
+                size_hint_x: 0.3
+            Label:
+                text: "Количиство:"
+            Widget:
+                size_hint_x: 0.1
+            Label:
+                text: "Цена:"
+            Label:
+                text: "Объём:"
+            Widget:
+                size_hint_x: 1
+            Widget:
+                size_hint_x: 1
+                
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True
@@ -210,6 +326,23 @@
             background_normal: ""
             background_color: 0.3, 0.3, 0.3, 1
             on_press: root.goto_main()
+
+        BoxLayout:
+            size_hint_y: None
+            height: "36dp"
+            spacing: "10dp"
+            padding: "20dp", 0
+
+            Label:
+                text: "Товар"
+            Label:
+                text: "Цена"
+            Label:
+                text: "В коробке"
+            Label:
+                text: "Коробок"
+            Widget:
+                size_hint_x: 0.4
 
         ScrollView:
             do_scroll_x: False
