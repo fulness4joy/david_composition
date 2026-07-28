@@ -1,11 +1,11 @@
 {
     "яблоко": {
-        "quantity": "30",
+        "quantity": "40",
         "price": "35",
         "volume": "100"
     },
     "банан": {
-        "quantity": "5",
+        "quantity": "10",
         "price": "70",
         "volume": "120"
     },

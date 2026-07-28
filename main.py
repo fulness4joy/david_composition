@@ -15,6 +15,20 @@ from kivy.metrics import dp
 from kivy.core.window import Window
 from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.checkbox import CheckBox
+from datetime import datetime
+
+
+def read_json(path):
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def write_json(path, data):
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
 
 def get_box_count(name):
@@ -61,6 +75,24 @@ class BoxRow(BoxLayout):
         else:
             if self.product_name in basket:
                 basket.remove(self.product_name)
+
+
+class OrderRow(BoxLayout):
+    product_name = StringProperty("")
+    product_price = StringProperty("")
+    product_volume = StringProperty("")
+    quantity_box = StringProperty("0")
+    box_count = StringProperty("0")
+
+    def on_touch_up(self, touch):
+        if self.collide_point(touch.pos[0], touch.pos[1]) and self.product_name:
+            app = App.get_running_app()
+            screen = app.root.get_screen("order")
+            # print(touch)
+            screen.load_orders()
+            # app.root.current = "basket_item"
+            # app.root.transition.direction = "left"
+        return super().on_touch_up(touch)
 
 
 class MainLabel(Label):
@@ -113,6 +145,12 @@ class BasketScreen(Screen):
 
     def goto_main(self):
         self.manager.current = "main"
+        self.manager.transition.direction = "up"
+
+    def goto_order(self):
+        screen = self.manager.get_screen("order")
+        screen.load_orders()
+        self.manager.current = "order"
         self.manager.transition.direction = "up"
 
 
@@ -302,6 +340,132 @@ class MainScreen(Screen):
         self.manager.transition.direction = "down"
 
 
+class Order(Screen):
+    total_price = StringProperty("0")
+    buyer_name = StringProperty("")
+    buyer_surname = StringProperty("")
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+    def buyer_details(self, key, text):
+        if key == "name":
+            self.buyer_name = text
+        elif key == "Фамилия":
+            self.buyer_surname = text
+
+    def get_full_name(self):
+        full_name = f"{self.buyer_name} {self.buyer_surname}".strip()
+        return full_name
+
+    def seller_id(self, full_name):
+        sellers_path = PATH_DATA + "sellers.json"
+        sellers = read_json(sellers_path)
+
+        if full_name in sellers:
+            return sellers[full_name]
+
+        used_ids = []
+        for seller in sellers:
+            used_ids.append(sellers[seller])
+
+        new_id = 1001
+        while new_id in used_ids:
+            new_id += 1
+
+        sellers[full_name] = new_id
+        write_json(sellers_path, sellers)
+        return new_id
+
+    def number_order(self):
+        data = read_json(PATH_DATA + "orders.json")
+        count = 0
+        for seller in data:
+            count += len(data[seller])
+        return count + 1
+
+    def confirm_order(self):
+        full_name = self.get_full_name()
+        if not full_name:
+            return False
+
+        items = {}
+        for name in basket:
+            box_count = get_box_count(name)
+            if box_count >= 1:
+                items[name] = box_count
+
+        if not items:
+            return False
+
+        seller_id = self.seller_id(full_name)
+        date = datetime.now().strftime("%d.%m.%Y")
+        order_number = self.number_order()
+
+        orders_path = PATH_DATA + "orders.json"
+        data = read_json(orders_path)
+        seller_key = str(seller_id)
+        if seller_key not in data:
+            data[seller_key] = {}
+
+        data[seller_key][date] = {
+            "order_number": order_number,
+            "items": items,
+        }
+        write_json(orders_path, data)
+
+        basket.clear()
+        basket_quantity.clear()
+        self.buyer_name = ""
+        self.buyer_surname = ""
+
+        self.manager.current = "main"
+        self.manager.transition.direction = "down"
+        return True
+
+    def load_orders(self):
+        screen = self.manager.get_screen("product_screen")
+        products = screen.read_products()
+        self.ids.order_products.clear_widgets()
+        for name in basket:
+            if name in products:
+                info = products[name]
+                box_count = get_box_count(name)
+
+                row = OrderRow(
+                    product_name=name,
+                    product_price=info["price"],
+                    product_volume=info["volume"],
+                    quantity_box=info["quantity"],
+                    box_count=str(box_count),
+                )
+                self.ids.order_products.add_widget(row)
+
+        self.total_price = self.sum_price()
+
+    def sum_price(self):
+        screen = self.manager.get_screen("product_screen")
+        products = screen.read_products()
+        total = 0
+
+        for name in basket:
+            if name in products:
+                box_count = get_box_count(name)
+                if box_count >= 1:
+                    total += (
+                        box_count
+                        * int(products[name]["quantity"])
+                        * int(products[name]["price"])
+                    )
+
+        return str(total)
+
+
+# class Order:
+#     def __init__(self):
+#         pass
+
+
 class CompositionApp(App):
     resources = RESOURCES
 
@@ -312,6 +476,7 @@ class CompositionApp(App):
         scr_sm.add_widget(ProductScreen(name="product_screen"))
         scr_sm.add_widget(BasketScreen(name="basket"))
         scr_sm.add_widget(BasketItemScreen(name="basket_item"))
+        scr_sm.add_widget(Order(name="order"))
 
         return scr_sm
 
@@ -319,7 +484,10 @@ class CompositionApp(App):
 if __name__ == "__main__":
 
     Window.clearcolor = (0.12, 0.16, 0.22, 1)
-    Window.size = (450, 900)
+    Window.size = (350, 700)
+    Window.left = 450
+    Window.top = 1
 
     app = CompositionApp()
+    app.stop
     app.run()
