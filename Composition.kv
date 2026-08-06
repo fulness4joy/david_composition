@@ -204,7 +204,14 @@
                 background_color: 0.3, 0.3, 0.3, 1
                 on_press: root.goto_main()
 
-            Widget:
+            Button:
+                text: "Закази"
+                size_hint: None, None
+                size: "100dp", "40dp"
+                background_normal: ""
+                background_color: 0.3, 0.3, 0.3, 1
+                on_press: root.orders()
+
 
             Button:
                 text: "Корзина"
@@ -383,66 +390,234 @@
 
 
 <Order>:
+    canvas.before:
+        Color:
+            rgba: 0.09, 0.11, 0.16, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
     BoxLayout:
-        # spacing: 100
         orientation: "vertical"
+        padding: "20dp"
+        spacing: "16dp"
+
         BoxLayout:
-            padding: "100dp"
+            size_hint_y: None
+            height: "60dp"
+
+            Button:
+                text: "< Назад"
+                size_hint_x: None
+                width: "90dp"
+                font_size: "15sp"
+                background_normal: ""
+                background_down: ""
+                background_color: 0, 0, 0, 0
+                color: 0.7, 0.75, 0.85, 1
+                on_press: root.goto_basket()
+
             Label:
                 text: "Заказ"
+                font_size: "28sp"
+                bold: True
+                color: 1, 1, 1, 1
+
+            Widget:
+                size_hint_x: None
+                width: "90dp"
+
         BoxLayout:
-            padding: "100dp"
+            size_hint_y: None
+            height: "30dp"
             Label:
                 text: "Номер заказа: " + str(root.number_order())
-        
+                font_size: "16sp"
+                color: 0.7, 0.75, 0.85, 1
+
         BoxLayout:
             orientation: "horizontal"
-            padding: "50dp"
+            size_hint_y: None
+            height: "50dp"
+            spacing: "12dp"
+
             TextInput:
                 hint_text: "Имя"
                 multiline: False
-                font_size: "24sp"
-                halign: "center"
+                font_size: "18sp"
+                background_color: 0.15, 0.17, 0.23, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.55, 0.6, 0.7, 1
+                cursor_color: 1, 1, 1, 1
+                padding: "14dp"
                 on_text: root.buyer_details("name", self.text)
-            
+
             TextInput:
                 hint_text: "Фамилия"
                 multiline: False
-                font_size: "24sp"
-                halign: "center"
+                font_size: "18sp"
+                background_color: 0.15, 0.17, 0.23, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.55, 0.6, 0.7, 1
+                cursor_color: 1, 1, 1, 1
+                padding: "14dp"
                 on_text: root.buyer_details("Фамилия", self.text)
+
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True
             GridLayout:
                 id: order_products
                 cols: 1
-                row_default_height: 40
+                row_default_height: 44
                 size_hint_y: None
                 height: self.minimum_height
-                padding: '20dp'
-                spacing: '6dp'
+                spacing: "8dp"
 
         BoxLayout:
             size_hint_y: None
             height: "36dp"
             spacing: "10dp"
-            padding: "20dp", 0
+            padding: "10dp", 0
 
             Label:
                 text: "Товар"
+                bold: True
+                color: 0.7, 0.75, 0.85, 1
             Label:
                 text: "Цена"
+                bold: True
+                color: 0.7, 0.75, 0.85, 1
             Label:
                 text: "В коробке"
+                bold: True
+                color: 0.7, 0.75, 0.85, 1
             Label:
                 text: "Коробок"
+                bold: True
+                color: 0.7, 0.75, 0.85, 1
             Widget:
                 size_hint_x: 0.4
+
         BoxLayout:
             orientation: "horizontal"
+            size_hint_y: None
+            height: "40dp"
+            spacing: "10dp"
+
+            CheckBox:
+                size_hint_x: None
+                width: "40dp"
+                active: root.pack_order
+                on_active: root.toggle_packing(self.active)
+
+            Label:
+                text: "Упаковать в коробку (10 л)"
+                font_size: "15sp"
+                color: 1, 1, 1, 1
+                text_size: self.size
+
+        BoxLayout:
+            size_hint_y: None
+            height: "26dp"
+            opacity: 1 
+
+            Label:
+                text: root.volume_status
+                font_size: "13sp"
+                color: 0.95, 0.3, 0.3, 1
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: "56dp"
+            spacing: "12dp"
+
             Label:
                 text: root.total_price
+                font_size: "22sp"
+                bold: True
+                color: 1, 1, 1, 1
+
             Button:
                 text: "Подтвердить"
+                font_size: "18sp"
+                bold: True
+                background_color: (0.22, 0.65, 0.4, 1)
+                color: 1, 1, 1, 1
                 on_press: root.confirm_order()
+
+
+<OrderConfirmedScreen>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: "32dp", "40dp"
+        spacing: "22dp"
+
+        Widget:
+            size_hint_y: 1
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: "160dp"
+
+            Widget:
+                size_hint_x: 1
+            Widget:
+                id: circle_bg
+                size_hint: None, None
+                size: "160dp", "160dp"
+                canvas.before:
+                    Color:
+                        rgba: 0.20, 0.68, 0.32, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Line:
+                        points: [self.x + self.width * 0.28, self.y + self.height * 0.52, self.x + self.width * 0.45, self.y + self.height * 0.30, self.x + self.width * 0.76, self.y + self.height * 0.66]
+                        width: dp(8)
+                        cap: "round"
+                        joint: "round"
+            Widget:
+                size_hint_x: 1
+
+        Label:
+            text: "Спасибо, " + root.buyer_full_name + "!"
+            font_size: "24sp"
+            bold: True
+            color: 0.1, 0.1, 0.1, 1
+            size_hint_y: None
+            height: "34dp"
+
+        Label:
+            text: "Ваш заказ успешно оформлен. Мы свяжемся с вами в ближайшее время.\nНомер вашего заказа #" + root.order_number + "."
+            font_size: "15sp"
+            color: 0.4, 0.4, 0.4, 1
+            size_hint_y: None
+            height: "60dp"
+            text_size: self.width, None
+
+        Widget:
+            size_hint_y: 1
+
+        Button:
+            text: "ВЕРНУТЬСЯ В МАГАЗИН"
+            height: "52dp"
+            font_size: "16sp"
+            bold: True
+            background_color: 0.86, 0.14, 0.28, 1
+            color: 1, 1, 1, 1
+            on_press: root.goto_main()

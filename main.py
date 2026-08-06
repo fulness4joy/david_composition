@@ -344,11 +344,15 @@ class Order(Screen):
     total_price = StringProperty("0")
     buyer_name = StringProperty("")
     buyer_surname = StringProperty("")
+    pack_order = BooleanProperty(False)
+    total_volume = StringProperty("0")
+    volume_fits = BooleanProperty(True)
+    volume_status = StringProperty("")
 
     def __init__(self, **kw):
         super().__init__(**kw)
 
-    def buyer_details(self, key, text):
+    def buyer_details(self, key: str, text: str):
         if key == "name":
             self.buyer_name = text
         elif key == "Фамилия":
@@ -384,9 +388,50 @@ class Order(Screen):
             count += len(data[seller])
         return count + 1
 
+    def goto_basket(self):
+        screen = self.manager.get_screen("basket")
+        screen.load_basket()
+        self.manager.current = "basket"
+        self.manager.transition.direction = "down"
+
+    def toggle_packing(self, active):
+        self.pack_order = active
+        self.check_packaging()
+
+    def calc_total_volume(self):
+        screen = self.manager.get_screen("product_screen")
+        products = screen.read_products()
+        total = 0
+
+        for name in basket:
+            if name in products:
+                box_count = get_box_count(name)
+                if box_count >= 1:
+                    quantity = int(products[name]["quantity"])
+                    volume = int(products[name]["volume"])
+                    total += box_count * quantity * volume
+
+        return total
+
+    def check_packaging(self):
+        total = self.calc_total_volume()
+        self.total_volume = str(total)
+        self.volume_fits = total <= PACKING_BOX_VOLUME
+
+        volume_liters = total / 1000
+        if self.volume_fits:
+            self.volume_status = ""
+        else:
+            self.volume_status = (
+                f"Не вмещается! {volume_liters} л из 10 л — уберите часть товара"
+            )
+
     def confirm_order(self):
         full_name = self.get_full_name()
         if not full_name:
+            return False
+
+        if self.pack_order and not self.volume_fits:
             return False
 
         items = {}
@@ -414,13 +459,44 @@ class Order(Screen):
         }
         write_json(orders_path, data)
 
+        product_screen = self.manager.get_screen("product_screen")
+        products = product_screen.read_products()
+        receipt_items = []
+        total = 0
+        for name, box_count in items.items():
+            if name in products:
+                info = products[name]
+                price = int(info["price"])
+                quantity = int(info["quantity"])
+                subtotal = price * quantity * box_count
+                total += subtotal
+                receipt_items.append(
+                    {
+                        "name": name,
+                        "box_count": str(box_count),
+                        "subtotal": str(subtotal),
+                    }
+                )
+
+        confirm_screen = self.manager.get_screen("order_confirmed")
+        confirm_screen.load_item(
+            order_number=order_number,
+            full_name=full_name,
+            date=date,
+            items=receipt_items,
+            total=str(total),
+        )
+
         basket.clear()
         basket_quantity.clear()
         self.buyer_name = ""
         self.buyer_surname = ""
+        self.pack_order = False
+        self.total_volume = "0"
+        self.volume_fits = True
 
-        self.manager.current = "main"
-        self.manager.transition.direction = "down"
+        self.manager.current = "order_confirmed"
+        self.manager.transition.direction = "left"
         return True
 
     def load_orders(self):
@@ -442,8 +518,9 @@ class Order(Screen):
                 self.ids.order_products.add_widget(row)
 
         self.total_price = self.sum_price()
+        self.check_packaging()
 
-    def sum_price(self):
+    def sum_price(self) -> str:
         screen = self.manager.get_screen("product_screen")
         products = screen.read_products()
         total = 0
@@ -461,9 +538,21 @@ class Order(Screen):
         return str(total)
 
 
-# class Order:
-#     def __init__(self):
-#         pass
+class OrderConfirmedScreen(Screen):
+    order_number = StringProperty("")
+    buyer_full_name = StringProperty("")
+    order_date = StringProperty("")
+    total_price = StringProperty("0")
+
+    def load_item(self, order_number, full_name, date, items, total):
+        self.order_number = str(order_number)
+        self.buyer_full_name = full_name
+        self.order_date = date
+        self.total_price = total
+
+    def goto_main(self):
+        self.manager.current = "main"
+        self.manager.transition.direction = "up"
 
 
 class CompositionApp(App):
@@ -477,6 +566,7 @@ class CompositionApp(App):
         scr_sm.add_widget(BasketScreen(name="basket"))
         scr_sm.add_widget(BasketItemScreen(name="basket_item"))
         scr_sm.add_widget(Order(name="order"))
+        scr_sm.add_widget(OrderConfirmedScreen(name="order_confirmed"))
 
         return scr_sm
 
