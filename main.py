@@ -53,6 +53,12 @@ def remove_box_count(name):
             return
 
 
+def read_products():
+    with open(PATH_DATA + "list_products.json", "r", encoding="utf8") as file:
+        data = json.load(file)
+    return data
+
+
 class BoxRow(BoxLayout):
     product_name = StringProperty("")
     product_price = StringProperty("")
@@ -88,10 +94,8 @@ class OrderRow(BoxLayout):
         if self.collide_point(touch.pos[0], touch.pos[1]) and self.product_name:
             app = App.get_running_app()
             screen = app.root.get_screen("order")
-            # print(touch)
             screen.load_orders()
-            # app.root.current = "basket_item"
-            # app.root.transition.direction = "left"
+
         return super().on_touch_up(touch)
 
 
@@ -125,8 +129,7 @@ class BasketScreen(Screen):
         super().__init__(**kw)
 
     def load_basket(self):
-        screen = self.manager.get_screen("product_screen")
-        products = screen.read_products()
+        products = read_products()
         self.ids.basket_container.clear_widgets()
 
         for name in basket:
@@ -161,8 +164,7 @@ class BasketItemScreen(Screen):
     box_count = StringProperty("0")
 
     def load_item(self, name):
-        product_screen = self.manager.get_screen("product_screen")
-        products = product_screen.read_products()
+        products = read_products()
 
         self.product_name = name
         self.product_image = RESOURCES[name]
@@ -219,17 +221,12 @@ class ProductScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
 
-    def read_products(self):
-        with open(PATH_DATA + "list_products.json", "r", encoding="utf8") as file:
-            data = json.load(file)
-        return data
-
     def write_products(self, products):
         with open(PATH_DATA + "list_products.json", "w", encoding="utf8") as file:
             json.dump(products, file, ensure_ascii=False, indent=4)
 
     def load_product(self, name):
-        products = self.read_products()
+        products = read_products()
 
         self.product_name = name
         self.product_image = RESOURCES[self.product_name]
@@ -244,7 +241,7 @@ class ProductScreen(Screen):
             self.product_volume = info["volume"]
 
     def save_quantity(self):
-        products = self.read_products()
+        products = read_products()
 
         if self.product_name in products:
             products[self.product_name]["quantity"] = self.product_quantity
@@ -267,7 +264,7 @@ class ProductScreen(Screen):
             self.save_quantity()
 
     def delete_product(self):
-        products = self.read_products()
+        products = read_products()
 
         if self.product_name in products:
             del products[self.product_name]
@@ -303,8 +300,7 @@ class MainScreen(Screen):
             RESOURCES.update(data)
 
     def load_products(self):
-        screen = self.manager.get_screen("product_screen")
-        products = screen.read_products()
+        products = read_products()
         self.ids.main_container.clear_widgets()
         cb_active = False
 
@@ -313,7 +309,6 @@ class MainScreen(Screen):
                 cb_active = True
             else:
                 cb_active = False
-            # print(name, cb_active)
 
             bl = BoxRow(
                 product_name=name,
@@ -399,8 +394,7 @@ class Order(Screen):
         self.check_packaging()
 
     def calc_total_volume(self):
-        screen = self.manager.get_screen("product_screen")
-        products = screen.read_products()
+        products = read_products()
         total = 0
 
         for name in basket:
@@ -459,8 +453,7 @@ class Order(Screen):
         }
         write_json(orders_path, data)
 
-        product_screen = self.manager.get_screen("product_screen")
-        products = product_screen.read_products()
+        products = read_products()
         receipt_items = []
         total = 0
         for name, box_count in items.items():
@@ -500,8 +493,7 @@ class Order(Screen):
         return True
 
     def load_orders(self):
-        screen = self.manager.get_screen("product_screen")
-        products = screen.read_products()
+        products = read_products()
         self.ids.order_products.clear_widgets()
         for name in basket:
             if name in products:
@@ -521,8 +513,7 @@ class Order(Screen):
         self.check_packaging()
 
     def sum_price(self) -> str:
-        screen = self.manager.get_screen("product_screen")
-        products = screen.read_products()
+        products = read_products()
         total = 0
 
         for name in basket:

@@ -1,6 +1,6 @@
 {
     "яблоко": {
-        "quantity": "50",
+        "quantity": "30",
         "price": "35",
         "volume": "100"
     },
@@ -20,7 +20,7 @@
         "volume": "500"
     },
     "ананас": {
-        "quantity": "3",
+        "quantity": "1",
         "price": "180",
         "volume": "1000"
     },
