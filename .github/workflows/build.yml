@@ -5,29 +5,30 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install Buildozer
+      - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip
-          pip3 install buildozer cython
+          sudo apt install -y \
+            git zip unzip openjdk-17-jdk \
+            python3-pip python3-venv \
+            autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev \
+            libncursesw5-dev libtinfo6 \
+            cmake libffi-dev libssl-dev
 
       - name: Build APK
-        run: |
-          buildozer android debug
+        uses: digreatbrian/buildozer-action@v2
+        with:
+          python-version: 3.11
+          buildozer-cmd: buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: bin/*.apk
+          path: ./bin/*.apk
