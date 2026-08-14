@@ -2,17 +2,13 @@ name: Build APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,36 +21,29 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Buildozer from GitHub
         run: |
-          sudo apt update
-          sudo apt install -y \
-            git zip unzip openjdk-17-jdk \
-            autoconf libtool pkg-config \
-            zlib1g-dev libncurses5-dev \
-            libncursesw5-dev libtinfo6 \
-            cmake libffi-dev libssl-dev
-
           python -m pip install --upgrade pip
-          pip install buildozer cython
+          pip uninstall -y buildozer || true
+          pip install --upgrade cython
+          pip install git+https://github.com/kivy/buildozer.git
 
-      - name: Create Android license files
+      - name: Show versions
         run: |
-          mkdir -p ~/.android
+          buildozer --version
+          pip show buildozer
+          python --version
 
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          echo "84831b9409646a918e30573bab4c9c91346d8abd" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.android/repositories.cfg
+      - name: Clean cache
+        run: |
+          rm -rf ~/.buildozer
 
       - name: Build APK
         run: |
           buildozer -v android debug
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: apk
